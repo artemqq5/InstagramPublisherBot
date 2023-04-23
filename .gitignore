@@ -3,4 +3,4 @@
 __pycache__
 
 PrivateConfig.py
-.db
+*.db

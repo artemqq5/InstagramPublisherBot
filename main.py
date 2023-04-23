@@ -25,7 +25,7 @@ userCommands = ("/start", "/help", "/set_token", "/get_all_posts")
 async def initialCommands(message):
     global userState
     userState = SET_NONE
-    
+
     if message.text == "/start":
 
         # check if user not registered to register him
@@ -55,8 +55,11 @@ async def getToken(message):
         updateToken(result, message.chat.id)
         await bot.send_message(message.chat.id, SUCCESSFUL_GENERATE_TOKEN)
     except Exception as e:
-        await bot.send_message(message.chat.id, CHECK_ACCESS_TOKEN)
         print(f"except when generate long token {e}")
+        if getUser(message.chat.id) is None:
+            await bot.send_message(message.chat.id, YOU_NEED_REGISTER)
+        else:
+            await bot.send_message(message.chat.id, CHECK_ACCESS_TOKEN)
 
 
 @bot.message_handler(commands=['get_all_posts'])
