@@ -18,9 +18,14 @@ SET_NONE = "none"
 #
 userState = SET_NONE
 
+userCommands = ("/start", "/help", "/set_token", "/get_all_posts")
+
 
 @bot.message_handler(commands=['start', 'help'])
 async def initialCommands(message):
+    global userState
+    userState = SET_NONE
+    
     if message.text == "/start":
 
         # check if user not registered to register him
@@ -36,13 +41,15 @@ async def initialCommands(message):
 async def setToken(message):
     global userState
     userState = SET_TOKEN
+
     await bot.reply_to(message, "Input your token:")
 
 
-@bot.message_handler(func=lambda m: userState is SET_TOKEN)
+@bot.message_handler(func=lambda m: userState is SET_TOKEN and m.text not in userCommands)
 async def getToken(message):
     global userState
     userState = SET_NONE
+
     try:  # if response get code 400, field `access_token` haven't and throw exception
         result = getLongToken(message.text)['access_token']
         updateToken(result, message.chat.id)
@@ -54,6 +61,9 @@ async def getToken(message):
 
 @bot.message_handler(commands=['get_all_posts'])
 async def getAllMedia(message):
+    global userState
+    userState = SET_NONE
+
     try:  # if response get code 400, field `data` haven't and throw exception
         result = getAllPost(getUser(message.chat.id).token)
         for post in parseAllPosts(result):
@@ -66,5 +76,5 @@ async def getAllMedia(message):
 if __name__ == '__main__':
     try:
         asyncio.run(bot.polling(non_stop=True, request_timeout=90))
-    except:
-        print("except")
+    except Exception as exc:
+        print(f"except in bot {exc}")
