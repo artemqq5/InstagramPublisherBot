@@ -7,7 +7,7 @@
   <li>Set token to get long 60-day token to manage account fully</li>
 </ul>
 
-<h3>Available functionality as of now</h3>:
+<h3>Available functionality as of now:</h3>
  <ul>
-  <li>get all account`s post (img, desc, count of like and comments) with command /get_all_posts</li>
+  <li>Get all account`s post (img, desc, count of like and comments) with command /get_all_posts</li>
 </ul>
