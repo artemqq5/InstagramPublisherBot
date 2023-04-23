@@ -1,12 +1,14 @@
 import asyncio
+import io
 
 import requests
 from telebot.async_telebot import AsyncTeleBot
 
-from bs4 import BeautifulSoup
-
-from PrivateConfig import BOT_KEY_API, FB_ID, FB_SECRET, TOKEN_FB_60DAYS
-from instagramAPI.RequestsAPI import getUserInfo, getLongToken, getAllPost
+from DataBase.UserQuery import createUser, getUser, updateToken
+from Messages import *
+from PrivateConfig import BOT_KEY_API
+from instagramAPI.MediaDataParse import parseAllPosts
+from instagramAPI.RequestsAPI import getAllPost, getLongToken
 
 bot = AsyncTeleBot(f"{BOT_KEY_API}")
 
@@ -14,52 +16,51 @@ bot = AsyncTeleBot(f"{BOT_KEY_API}")
 SET_TOKEN = "setToken"
 SET_NONE = "none"
 #
-userState = "none"
-userToken = ""
-
-param = dict()
+userState = SET_NONE
 
 
 @bot.message_handler(commands=['start', 'help'])
 async def initialCommands(message):
     if message.text == "/start":
-        await bot.reply_to(message, "Hello, use /help to get all commands")
+
+        # check if user not registered to register him
+        if getUser(message.chat.id) is None:
+            createUser(message.chat.id)
+
+        await bot.reply_to(message, START_MESSAGE)
     else:
-        await bot.reply_to(message, "/set_token - sets your personal token to communicate with instagram account\n"
-                                    "/get_user - returns user (id, name)\n"
-                                    "/get_all_post - get all post for all time")
+        await bot.reply_to(message, HELP_MESSAGE)
 
 
-# @bot.message_handler(commands=['set_token'])
-# async def setToken(message):
-#     global userState
-#     userState = SET_TOKEN
-#     await bot.reply_to(message, "input your token:")
+@bot.message_handler(commands=['set_token'])
+async def setToken(message):
+    global userState
+    userState = SET_TOKEN
+    await bot.reply_to(message, "Input your token:")
 
 
-@bot.message_handler(commands=['get_user'])
-async def getUser(message):
-    try:
-        result = getUserInfo()
-        await bot.send_message(message.chat.id, f"{result}")
+@bot.message_handler(func=lambda m: userState is SET_TOKEN)
+async def getToken(message):
+    global userState
+    userState = SET_NONE
+    try:  # if response get code 400, field `access_token` haven't and throw exception
+        result = getLongToken(message.text)['access_token']
+        updateToken(result, message.chat.id)
+        await bot.send_message(message.chat.id, SUCCESSFUL_GENERATE_TOKEN)
     except Exception as e:
-        print("exception when get user{0}".format(e))
+        await bot.send_message(message.chat.id, CHECK_ACCESS_TOKEN)
+        print(f"except when generate long token {e}")
 
 
-@bot.message_handler(commands=['get_all_post'])
+@bot.message_handler(commands=['get_all_posts'])
 async def getAllMedia(message):
-    try:
-        result = getAllPost()
-        await bot.send_message(message.chat.id, f"{result}")
+    try:  # if response get code 400, field `data` haven't and throw exception
+        result = getAllPost(getUser(message.chat.id).token)
+        for post in parseAllPosts(result):
+            await bot.send_photo(message.chat.id, photo=post.img, caption=post.desc)
     except Exception as e:
-        print("exception when get user{0}".format(e))
-
-
-# @bot.message_handler(func=lambda m: userState is SET_TOKEN)
-# async def setToken(message):
-#     global userToken, userState
-#     userState = SET_NONE
-#     print(getLongToken(message.text))
+        await bot.send_message(message.chat.id, GET_MEDIA_EXCEPTION)
+        print(f"exception when getAllPost {e}")
 
 
 if __name__ == '__main__':
