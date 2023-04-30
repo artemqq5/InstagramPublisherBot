@@ -12,6 +12,6 @@
   <li>Get all account`s img post (img, desc, count of like and comments) with command /get_all_posts</li>
   <li>Get info about account (photo, name, followers count, id, website, biography and other)</li>
   <li>Post img publication (img, caption)</li>
-  <li>Post img carousel publication (several img (up to 10), caption</li>
+  <li>Post img carousel publication (several img (up to 10), caption)</li>
   <li>Statistic Requests (impressions, reach, profile_views, follower_count, website_clicks and many other)</li>
 </ul>
