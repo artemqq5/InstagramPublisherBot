@@ -6,12 +6,18 @@ def selectTypePost():
 
     listButtons = (
         types.InlineKeyboardButton('Image', callback_data="img_post"),
-        # types.InlineKeyboardButton('Video', callback_data="video_post"),
-        # types.InlineKeyboardButton('Reels', callback_data="reels_post"),
-        # types.InlineKeyboardButton('Ring Galleries', callback_data="ring_galleries_post"),
+        types.InlineKeyboardButton('Ring Galleries', callback_data="ring_gallery_post"),
     )
 
     for i in listButtons:
         markup.add(i)
 
     return markup
+
+
+def nextStepGallery():
+    return types.ReplyKeyboardMarkup().add(types.KeyboardButton('Next'))
+
+
+def closeMarkup():
+    return types.ReplyKeyboardRemove(selective=False)

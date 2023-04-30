@@ -16,3 +16,4 @@ GET_MEDIA_EXCEPTION = "An error occurred while retrieving media files, please tr
 EXCEPTION_AUTHORISATION = "You are not authorised or token was deprecated. /start or /set_token"
 
 EXCEPT_CREATE_POST = "Exception when create post"
+EXCEPT_ADD_IMG = "Exception when adding img"
