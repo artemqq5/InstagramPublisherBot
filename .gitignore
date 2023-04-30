@@ -4,3 +4,4 @@ __pycache__
 
 PrivateConfig.py
 *.db
+.DS_Store
