@@ -68,3 +68,20 @@ def publishMEDIA(token_60days, id_container):
     print(f"response publishMEDIA {response.json()}")
 
     return response.json()
+
+
+def getStatistic(token_60days, data, total_value=False):
+
+    if total_value:
+        sub = "&metric_type=total_value"
+    else:
+        sub = ""
+
+    return requests.get(BASE_URL_API +
+                        INSTAGRAM_BUSINESS_ID +
+                        "/insights"
+                        f"?metric={data}"
+                        "&period=day" +
+                        sub +
+                        f"&access_token={token_60days}"
+                        ).json()

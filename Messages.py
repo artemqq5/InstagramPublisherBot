@@ -1,10 +1,10 @@
 START_MESSAGE = "Hello, use /help to get all commands"
 
-HELP_MESSAGE = "\n" \
-               "/set_token - sets your personal token to communicate with instagram account\n\n" \
+HELP_MESSAGE = "/set_token - sets your personal token to communicate with instagram account\n\n" \
                "/get_all_posts - get all post for all time\n\n" \
                "/publish_post - publication media files\n\n" \
-               "/account - get info about account\n"
+               "/account - get info about account\n\n" \
+               "/statistic - get statistic about account or publication"
 
 YOU_NEED_REGISTER = "You are not register, use /start to register"
 CHECK_ACCESS_TOKEN = "Error. Check your access-token and try again"

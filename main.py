@@ -3,14 +3,15 @@ import io
 import threading
 
 import requests
-from markups.PublicationsPost import selectTypePost, nextStepGallery, closeMarkup
+from markups.MarkupsMenu import selectTypePost, nextStepGallery, closeMarkup, selectTypeStatistic
 from telebot.async_telebot import AsyncTeleBot
 
 from DataBase.UserQuery import createUser, getUser, updateToken
 from Messages import *
 from PrivateConfig import BOT_KEY_API
 from instagramAPI.MediaDataParse import parseAllPosts
-from instagramAPI.RequestsAPI import getAllPost, getLongToken, createContainerMEDIA, publishMEDIA, getAccountInfo
+from instagramAPI.RequestsAPI import getAllPost, getLongToken, createContainerMEDIA, publishMEDIA, getAccountInfo, \
+    getStatistic
 
 bot = AsyncTeleBot(f"{BOT_KEY_API}")
 
@@ -21,7 +22,7 @@ CREATE_CONTAINER_IMG = "CREATE_CONTAINER_POST_IMG"
 CREATE_CONTAINER_IMG_GALLERY = "CREATE_CONTAINER_POST_GALLERY_IMG"
 #
 userState = STATE_NONE
-userCommands = ("/start", "/help", "/set_token", "/get_all_posts", "/publish_post", "/account")
+userCommands = ("/start", "/help", "/set_token", "/get_all_posts", "/publish_post", "/account", "/statistic")
 
 operationCounter = {"counterStep": 0}  # counter steps into some operations
 localDataList = {}  # list to save temporary data
@@ -66,6 +67,18 @@ async def getToken(message):
             await bot.send_message(message.chat.id, YOU_NEED_REGISTER)
         else:
             await bot.send_message(message.chat.id, CHECK_ACCESS_TOKEN)
+
+
+@bot.message_handler(commands=['statistic'])
+async def getUserInfo(message):
+    global userState
+    userState = STATE_NONE
+    user = getUser(message.chat.id)
+
+    if user is not None:
+        await bot.send_message(message.chat.id, "Select type of statistic", reply_markup=selectTypeStatistic())
+    else:
+        await bot.send_message(message.chat.id, EXCEPTION_AUTHORISATION)
 
 
 @bot.message_handler(commands=['account'])
@@ -199,6 +212,45 @@ async def publicationCallBackHandler(call):
                 userState = CREATE_CONTAINER_IMG_GALLERY
                 await bot.send_message(call.from_user.id, "Input URL to set img : ")
             case _:
+                pass
+    else:
+        await bot.send_message(call.from_user.id, EXCEPTION_AUTHORISATION)
+
+
+@bot.callback_query_handler(
+    func=lambda call: call.data in ["impressions", "reach", "profile_views", "follower_count", "website_clicks",
+                                    "total_interactions", "likes", "comments", "shares", "saves", "replies"])
+async def statisticCallBackHandler(call):
+    global userState
+    userState = STATE_NONE  # clear user state
+
+    user = getUser(call.from_user.id)
+    if user is not None:
+        match call.data:
+            case "impressions" | "reach" | "profile_views" | "follower_count" | "website_clicks":
+                try:
+                    res = getStatistic(user.token, call.data)
+                    if len(res['data']) != 0:
+                        value = res['data'][0]['values'][0]['value'] + res['data'][0]['values'][1]['value']
+                        text = res['data'][0]['description']
+                        await bot.send_message(call.from_user.id, f"{text}\n\n{value}")
+                    else:
+                        await bot.send_message(call.from_user.id, "no data")
+
+                except Exception as e:
+                    print(f"exception statisticCallBackHandler {e}")
+            case "total_interactions" | "likes" | "comments" | "shares" | "saves" | "replies":
+                try:
+                    res = getStatistic(user.token, call.data, True)
+                    print(res)
+                    if len(res['data']) != 0:
+                        value = res['data'][0]['total_value']['value']
+                        text = res['data'][0]['description']
+                        await bot.send_message(call.from_user.id, f"{text}\n\n{value}")
+                    else:
+                        await bot.send_message(call.from_user.id, "no data")
+                except Exception as e:
+                    print(f"statisticCallBackHandler {e}")
                 pass
     else:
         await bot.send_message(call.from_user.id, EXCEPTION_AUTHORISATION)
