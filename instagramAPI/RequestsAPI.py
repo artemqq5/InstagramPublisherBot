@@ -1,3 +1,5 @@
+import json
+
 import requests
 
 from PrivateConfig import FB_ID, FB_SECRET, INSTAGRAM_BUSINESS_ID
@@ -21,3 +23,48 @@ def getLongToken(access_token):
                         f"client_id={FB_ID}&"
                         f"client_secret={FB_SECRET}&"
                         f"fb_exchange_token={access_token}").json()
+
+
+def getAccountInfo(token_60days):
+    return requests.get(
+        BASE_URL_API +
+        INSTAGRAM_BUSINESS_ID +
+        "?fields=biography,"
+        "followers_count,"
+        "follows_count,"
+        "media_count,"
+        "name,"
+        "profile_picture_url,"
+        "username,"
+        "website"
+        f"&access_token={token_60days}"
+    )
+
+
+def createContainerMEDIA(token_60days, data):
+    data['access_token'] = token_60days
+
+    json_data = json.dumps(data)
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.post(
+        BASE_URL_API + INSTAGRAM_BUSINESS_ID + "/media",
+        data=json_data,
+        headers=headers
+    )
+
+    print(f"response createContainerMEDIA {response.json()}")
+
+    return response.json()
+
+
+def publishMEDIA(token_60days, id_container):
+    response = requests.post(BASE_URL_API +
+                             INSTAGRAM_BUSINESS_ID +
+                             "/media_publish"
+                             f"?creation_id={id_container}"
+                             f"&access_token={token_60days}")
+
+    print(f"response publishMEDIA {response.json()}")
+
+    return response.json()
