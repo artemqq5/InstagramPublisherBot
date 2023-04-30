@@ -9,5 +9,7 @@
 
 <h3>Available functionality as of now:</h3>
  <ul>
-  <li>Get all account`s post (img, desc, count of like and comments) with command /get_all_posts</li>
+  <li>Get all account`s img post (img, desc, count of like and comments) with command /get_all_posts</li>
+  <li>Get info about account (photo, name, followers count, id, website, biography and other)</li>
+  <li>Post img publication (img, caption)</li>
 </ul>
